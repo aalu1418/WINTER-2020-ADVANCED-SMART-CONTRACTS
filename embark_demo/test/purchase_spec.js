@@ -44,7 +44,7 @@ contract("Purchase", function () {
     assert.ok(result.length > 0);
   });
 
-  // ---------------Comment out to Test Aborted Transaction ---------------//
+  // ------------- Comment out to test aborted transaction -------------- //
   it("Buyer deposits funds and confirms purchase", async function(){
     let result = await Purchase.methods.confirmPurchase().send({
       from: buyerAddress,
@@ -83,7 +83,7 @@ contract("Purchase", function () {
     assert.ok(sellerChange.toNumber() == price);
     assert.ok(contractState == state["INACTIVE"]);
   })
-  // ----------------------------------------------------------------------//
+  // -------------------------------------------------------------------- //
 
   // ---------------Comment out to Test Successful Transaction -----------//
   // it("Seller aborts item", async function(){
