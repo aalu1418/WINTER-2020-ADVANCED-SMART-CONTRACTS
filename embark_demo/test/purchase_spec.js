@@ -1,5 +1,6 @@
 /*global artifacts, contract, config, it, assert, web3*/
 const Purchase = artifacts.require('Purchase');
+const BN = require('bn.js');
 
 let accounts;
 let buyerAddress;
@@ -43,6 +44,7 @@ contract("Purchase", function () {
     assert.ok(result.length > 0);
   });
 
+  // ---------------Comment out to Test Aborted Transaction ---------------//
   it("Buyer deposits funds and confirms purchase", async function(){
     let result = await Purchase.methods.confirmPurchase().send({
       from: buyerAddress,
@@ -61,11 +63,43 @@ contract("Purchase", function () {
 
   it("Buyer confirm received", async function(){
     // test here
-  })
+    let sellerBalance = await web3.eth.getBalance(sellerAddress);
+    sellerBalance = new BN(sellerBalance)
+    let result = await Purchase.methods.confirmReceived().send({
+      from: buyerAddress,
+    });
+    let contractBuyerAddress = await Purchase.buyer();
+    let contractSellerAddress = await Purchase.seller();
+    let contractState = await Purchase.state();
 
-  it("Seller aborts item", async function(){
-    // test here
+    let contractBalance = await web3.eth.getBalance(Purchase.options.address);
+    let sellerBalanceNew = await web3.eth.getBalance(sellerAddress);
+    sellerBalanceNew = new BN(sellerBalanceNew);
+
+    const sellerChange = sellerBalanceNew.sub(sellerBalance);
+    assert.ok(contractBuyerAddress == buyerAddress);
+    assert.ok(contractSellerAddress == sellerAddress);
+    assert.ok(contractBalance == 0);
+    assert.ok(sellerChange.toNumber() == price);
+    assert.ok(contractState == state["INACTIVE"]);
   })
+  // ----------------------------------------------------------------------//
+
+  // ---------------Comment out to Test Successful Transaction -----------//
+  // it("Seller aborts item", async function(){
+  //   // test here
+  //   let result = await Purchase.methods.abort().send({
+  //       from: sellerAddress,
+  //     });
+  //     let contractSellerAddress = await Purchase.seller();
+  //     let contractState = await Purchase.state();
+  //
+  //     let contractBalance = await web3.eth.getBalance(Purchase.options.address);
+  //     assert.ok(contractSellerAddress == sellerAddress);
+  //     assert.ok(contractBalance == 0);
+  //     assert.ok(contractState == state["INACTIVE"]);
+  // })
+  // ---------------------------------------------------------------------//
 
   // it("set storage value", async function () {
   //   await SimpleStorage.methods.set(150).send({from: web3.eth.defaultAccount});
